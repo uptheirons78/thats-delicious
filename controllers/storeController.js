@@ -82,3 +82,8 @@ exports.getStoreBySlug = async (req, res, next) => {
   if (!store) return next(); //it will pass to the next step in index.js, 404 NOT FOUND
   res.render('store', { store, title: store.name });
 };
+
+exports.getStoresByTag = async (req, res) => {
+  const stores = await Store.getTagsList();
+  res.json(stores);
+}
