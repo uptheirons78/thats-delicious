@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
+const multer = require('multer');
+const jimp = require('jimp'); //to resize photos
+const uuid = require('uuid');//to give photos a unique identifier
+
+const multerOptions = {
+    storage: multer.memoryStorage(),
+    fileFilter(req, file, next) {
+        const isPhoto = file.mimetype.startsWidth('image/');
+        if(isPhoto) {
+            next(null, true);
+        } else {
+            next({message: 'Filetype is not allowed!'}, false);
+        }
+    }
+}
 
 exports.homePage = (req, res) => {
     res.render('index', { title: 'I Love Food!'});
@@ -7,6 +22,24 @@ exports.homePage = (req, res) => {
 
 exports.addStore = (req, res) => {
     res.render('editStore', { title: 'Add Store'});
+}
+
+exports.upload = multer(multerOptions).single('photo');
+
+exports.resize = async(req, res, next) => {
+    //check if there is no new file to resize
+    if (!req.file) {
+        next(); //skip to the next middleware
+    }
+    const extension = req.file.mimetype.split('/')[1];
+    req.body.photo = `${uuid.v4()}.${extension}`;
+    //now we resize
+    const photo = await jimp.read(req.file.buffer);
+    await photo.resize(800, jimp.AUTO);
+    await photo.write(`./public/uploads/${req.body.photo}`);
+    //once the photo is written in our filesystem, continue with the next middleware
+    next();
+
 }
 
 //use async await to avoid "callbacks hell"!
