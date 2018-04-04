@@ -38,3 +38,26 @@ exports.register = async (req, res, next) => {
     await register(user, req.body.password); //never store password in DB
     next();
 };
+
+exports.account = (req, res) => {
+    res.render('account', { title: 'Edit Your Account'});
+};
+
+exports.updateAccount = async (req, res) => {
+    const updates = {
+        name: req.body.name,
+        email: req.body.email
+    };
+
+    const user = await User.findByIdAndUpdate(
+        //query
+        { _id: req.user.id },
+        //update
+        { $set: updates },
+        //options
+        { new: true, runValidators: true, context: 'query'}
+    );
+    
+    req.flash('success', 'Profile Updated!');
+    res.redirect('back');
+}

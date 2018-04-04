@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    .inner
+        form.form(action="/account", method="POST")
+            h2 Edit Your Account
+            label(for="name") Name
+            //- user.name and user.email comes from 'locals', see app.js file
+            input(type="text" name="name" value=user.name) 
+            label(for="email") Email
+            input(type="email" name="email" value=user.email)
+            input.button(type="submit", value="Update My Account") 
