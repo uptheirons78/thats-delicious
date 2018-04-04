@@ -76,7 +76,6 @@ exports.updateStore = async (req, res) => {
   // Redirect them the store and tell them it worked
 };
 
-//AIzaSyDZPZ28S-sjeUBp9X1Sfulj6JwYq54kIg0
 exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({ slug: req.params.slug });
   if (!store) return next(); //it will pass to the next step in index.js, 404 NOT FOUND
@@ -84,6 +83,16 @@ exports.getStoreBySlug = async (req, res, next) => {
 };
 
 exports.getStoresByTag = async (req, res) => {
-  const stores = await Store.getTagsList();
-  res.json(stores);
+  const tag = req.params.tag; //it grabs the specific tag from the url
+  const tagQuery = tag || { $exists: true }; //to show all store with a tag in Tags Page
+  //Await for multiple Promises
+  const tagsPromise = Store.getTagsList(); //here we create our static method getTagsList()
+  const storesPromise = Store.find({ tags: tagQuery }); //find stores with that specific tag
+
+  //Waiting now for both of them to resolve, before going on with the rendering
+  const [tags, stores] = await Promise.all([tagsPromise, storesPromise]);
+
+
+  //in order to highlight the tag page where we are
+  res.render('tag', { tags, title: 'Tags', tag, stores });
 }

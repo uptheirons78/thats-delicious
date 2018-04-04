@@ -52,11 +52,13 @@ storeSchema.pre('save', async function(next) {
     next();
 });
 
+//here we create a method! Put it in statics
 storeSchema.statics.getTagsList = function() {
-    return this.aggregate([
-        { $unwind: '$tags' },
-        { $group: { _id: '$tags', count: { $sum: 1 } }},
-        { $sort: { count: -1 } }
+    return this.aggregate([ //aggregate is a MongoDB method, like findOne()
+        //it is possible to find all $method in "pipeline operator" inside MongoDB documents
+        { $unwind: '$tags' }, //unwind store for any single tag it has
+        { $group: { _id: '$tags', count: { $sum: 1 } } }, //group by tags and count
+        { $sort: { count: -1 } } //sort by tags number (decreasing)
     ]);
 }
 
